@@ -11,4 +11,15 @@ export class AppController {
     console.log('ok na sa', data);
     return this.appService.getHello(data);
   }
+
+  @MessagePattern({ cmd: 'redis-set' })
+  setJSON(@Payload() data: { name: string; phone: string }) {
+    console.log(data);
+    return this.appService.setJSON(data);
+  }
+
+  @MessagePattern({ cmd: 'redis-get' })
+  getJSON() {
+    return this.appService.getJSON();
+  }
 }
