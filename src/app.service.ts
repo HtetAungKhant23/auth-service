@@ -9,14 +9,14 @@ export class AppService {
     return data;
   }
 
-  async setJSON(data: { name: string; phone: string }) {
+  async setJSON(data: { name: string; phone: string; keyName: string }) {
     const res = await this.redisService.setData(data);
     console.log(res, 'set');
     return res;
   }
 
-  async getJSON() {
-    const res = await this.redisService.getData();
+  async getJSON(data: string) {
+    const res = await this.redisService.getData(data);
     console.log(res, 'get');
     return res;
   }

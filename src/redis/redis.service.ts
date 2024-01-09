@@ -6,13 +6,13 @@ export class RedisService {
     @Inject('REDIS_CLIENT') private readonly redis: RedisClientType,
   ) {}
 
-  async setData(data: { name: string; phone: string }) {
-    const res = await this.redis.json.set('firstData', '$', data);
+  async setData(data: { name: string; phone: string; keyName: string }) {
+    const res = await this.redis.json.set(data.keyName, '$', data);
     return res;
   }
 
-  async getData() {
-    const res = await this.redis.json.get('firstData');
+  async getData(keyName: string) {
+    const res = await this.redis.json.get(keyName);
     return res;
   }
 }

@@ -13,13 +13,14 @@ export class AppController {
   }
 
   @MessagePattern({ cmd: 'redis-set' })
-  setJSON(@Payload() data: { name: string; phone: string }) {
+  setJSON(@Payload() data: { name: string; phone: string; keyName: string }) {
     console.log(data);
     return this.appService.setJSON(data);
   }
 
   @MessagePattern({ cmd: 'redis-get' })
-  getJSON() {
-    return this.appService.getJSON();
+  getJSON(@Payload() data: string) {
+    console.log(data);
+    return this.appService.getJSON(data);
   }
 }
