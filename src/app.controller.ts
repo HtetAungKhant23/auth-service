@@ -20,7 +20,7 @@ export class AppController {
 
   @MessagePattern({ cmd: 'redis-get' })
   getJSON(@Payload() data: string) {
-    console.log(data);
+    console.log(data, 'ok pr dl');
     return this.appService.getJSON(data);
   }
 }
