@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,7 +14,7 @@ async function bootstrap() {
   });
   await app.startAllMicroservices();
   await app.listen(3001).then(() => {
-    console.log('Auth Service is Successfully started 3001');
+    Logger.log('🚀 Auth Service Successfully started at 3001');
   });
 }
 bootstrap();
