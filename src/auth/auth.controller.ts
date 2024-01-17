@@ -12,7 +12,7 @@ export class AuthController {
   }
 
   @MessagePattern({ cmd: 'login' })
-  login(@Payload() dto: { name: string }) {
-    // return this.authService.login(dto);
+  login(@Payload() dto: { email: string; password: string }) {
+    return this.authService.login(dto);
   }
 }
