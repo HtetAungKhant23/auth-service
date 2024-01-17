@@ -7,7 +7,12 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @MessagePattern({ cmd: 'signup' })
-  signup(@Payload() dto: { name: string }) {
+  signup(@Payload() dto: { name: string; email: string; password: string }) {
     return this.authService.signup(dto);
+  }
+
+  @MessagePattern({ cmd: 'login' })
+  login(@Payload() dto: { name: string }) {
+    // return this.authService.login(dto);
   }
 }
