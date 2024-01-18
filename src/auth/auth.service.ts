@@ -55,14 +55,14 @@ export class AuthService {
     return {
       statusCode: 200,
       user: user,
-      token: await this.signToken(user.id, user.email),
+      token: await this.signToken(user.id, user.role),
     };
   }
 
-  async signToken(userId: string, email: string) {
+  async signToken(userId: string, role: string) {
     const payload = {
       id: userId,
-      email,
+      role,
     };
 
     const token = await this.jwt.signAsync(payload, {
