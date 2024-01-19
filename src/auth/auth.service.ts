@@ -10,13 +10,69 @@ export class AuthService {
     private jwt: JwtService,
   ) {}
 
+  async invite(dto: {
+    name: string;
+    phone: string;
+    email: string;
+    role: 'Admin' | 'Moderator';
+  }) {
+    const staffExist = await this.prisma.user.findFirst({
+      where: {
+        phone: dto.phone,
+      },
+    });
+    if (staffExist) {
+      throw new HttpException(
+        {
+          message: 'Phone number already exist',
+        },
+        500,
+      );
+    }
+
+    return await this.prisma.user
+      .create({
+        data: {
+          phone: dto.phone,
+          email: dto.email,
+          userProfile: {
+            create: {
+              username: dto.name,
+              role: dto.role,
+            },
+          },
+        },
+        include: {
+          userProfile: true,
+        },
+      })
+      .then((staff) => {
+        return {
+          statusCode: 201,
+          staff,
+        };
+      })
+      .catch((err) => {
+        throw new HttpException(
+          {
+            message: err ? err.message : 'cannot create staff',
+          },
+          500,
+        );
+      });
+  }
+
   async signup(dto: { name: string; email: string; password: string }) {
     return await this.prisma.user
       .create({
         data: {
-          name: dto.name,
           email: dto.email,
           password: await argon.hash(dto.password),
+          userProfile: {
+            create: {
+              username: dto.name,
+            },
+          },
         },
       })
       .then((user) => {
