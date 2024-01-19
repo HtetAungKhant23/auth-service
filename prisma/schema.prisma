@@ -8,16 +8,59 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique()
-  password  String
-  role      UserRole @default(User)
+  id        String  @id @default(uuid())
+  phone     String? @db.VarChar(255)
+  email     String  @unique @db.VarChar(255)
+  password  String  @db.VarChar(255)
+  isDeleted Boolean @default(false)
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userProfile UserProfile?
+}
+
+model Otp {
+  id     String     @id @default(uuid())
+  phone  String     @unique @db.VarChar(255)
+  code   String
+  status OTP_STATUS @default(UNUSED)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-enum UserRole {
+model UserProfile {
+  id       String    @id @default(uuid())
+  username String?
+  userId   String?   @unique @db.VarChar(255)
+  user     User?     @relation(references: [id], fields: [userId], onDelete: SetNull)
+  role     User_Role @default(User)
+  fileId   String?
+  file     File?     @relation(references: [id], fields: [fileId], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model File {
+  id       String @id @default(uuid())
+  fileName String @db.VarChar(255)
+  path     String @db.Text
+  slug     String @db.Text
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  UserProfile UserProfile[]
+}
+
+enum User_Role {
+  SuperAdmin
   Admin
+  Moderator
   User
+}
+
+enum OTP_STATUS {
+  UNUSED
+  USED
 }
