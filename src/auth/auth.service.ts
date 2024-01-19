@@ -98,6 +98,9 @@ export class AuthService {
       where: {
         email: dto.email,
       },
+      include: {
+        userProfile: true,
+      },
     });
 
     if (!user)
@@ -111,7 +114,7 @@ export class AuthService {
     return {
       statusCode: 200,
       user: user,
-      token: await this.signToken(user.id, user.role),
+      token: await this.signToken(user.id, user.userProfile.role),
     };
   }
 
