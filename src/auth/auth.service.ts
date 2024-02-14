@@ -2,6 +2,7 @@ import { ForbiddenException, HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
+import { CustomRpcException } from 'src/libs/exception/custom-rpc-exception';
 
 @Injectable()
 export class AuthService {
@@ -83,12 +84,10 @@ export class AuthService {
         };
       })
       .catch((err) => {
-        console.log(err);
-        throw new HttpException(
-          {
-            message: err ? err.message : 'cannot create user',
-          },
-          500,
+        throw new CustomRpcException(
+          400,
+          'User account cannot create',
+          err.code ? err.meta : err.message,
         );
       });
   }

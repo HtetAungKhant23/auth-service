@@ -4,7 +4,11 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    cors: {
+      origin: '*',
+    },
+  });
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.REDIS,
     options: {
