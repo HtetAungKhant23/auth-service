@@ -56,7 +56,7 @@ model File {
 enum User_Role {
   SuperAdmin
   Admin
-  Moderator
+  Staff
   User
 }
 
