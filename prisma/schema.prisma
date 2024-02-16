@@ -32,8 +32,8 @@ model Otp {
 model UserProfile {
   id       String    @id @default(uuid())
   username String?
-  userId   String?   @unique @db.VarChar(255)
-  user     User?     @relation(references: [id], fields: [userId], onDelete: SetNull)
+  userId   String    @unique @db.VarChar(255)
+  user     User      @relation(references: [id], fields: [userId], onDelete: Cascade)
   role     User_Role @default(User)
   fileId   String?
   file     File?     @relation(references: [id], fields: [fileId], onDelete: SetNull)
