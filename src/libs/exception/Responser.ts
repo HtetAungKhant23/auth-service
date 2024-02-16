@@ -1,18 +1,14 @@
 type responseInterface = {
   statusCode: number;
-  messageEn: string;
+  message: string;
   data: any;
 };
 
-export const Responser = ({
-  statusCode,
-  messageEn,
-  data,
-}: responseInterface) => {
+export const Responser = ({ statusCode, message, data }: responseInterface) => {
   return {
     _meta: {
       success: statusCode >= 200 && statusCode <= 300 ? true : false,
-      messageEn: messageEn,
+      message: message,
     },
     _data: data,
   };

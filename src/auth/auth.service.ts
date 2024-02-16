@@ -1,8 +1,9 @@
-import { ForbiddenException, HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { CustomRpcException } from 'src/libs/exception/custom-rpc-exception';
+import { Responser } from 'src/libs/exception/Responser';
 
 @Injectable()
 export class AuthService {
@@ -15,21 +16,16 @@ export class AuthService {
     name: string;
     phone: string;
     email: string;
-    role: 'Admin' | 'Moderator';
+    role: 'Admin' | 'Staff';
   }) {
-    const staffExist = await this.prisma.user.findFirst({
+    const existingStaffOrAdmin = await this.prisma.user.findFirst({
       where: {
         phone: dto.phone,
+        email: dto.email,
       },
     });
-    if (staffExist) {
-      throw new HttpException(
-        {
-          message: 'Phone number already exist',
-        },
-        500,
-      );
-    }
+    if (existingStaffOrAdmin)
+      throw new Error('Phone number or email already exist');
 
     return await this.prisma.user
       .create({
@@ -47,18 +43,18 @@ export class AuthService {
           userProfile: true,
         },
       })
-      .then((staff) => {
-        return {
+      .then((newInvited) => {
+        return Responser({
           statusCode: 201,
-          staff,
-        };
+          message: 'New invitation success',
+          data: newInvited,
+        });
       })
       .catch((err) => {
-        throw new HttpException(
-          {
-            message: err ? err.message : 'cannot create staff',
-          },
-          500,
+        throw new CustomRpcException(
+          400,
+          'Fail to new invite',
+          err.code ? err.meta : err.message,
         );
       });
   }
@@ -78,10 +74,11 @@ export class AuthService {
       })
       .then((user) => {
         delete user.password;
-        return {
-          statuscode: 201,
-          user,
-        };
+        return Responser({
+          statusCode: 201,
+          message: 'Sing up user successfully',
+          data: user,
+        });
       })
       .catch((err) => {
         throw new CustomRpcException(
@@ -93,28 +90,36 @@ export class AuthService {
   }
 
   async login(dto: { email: string; password: string }) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: dto.email,
-      },
-      include: {
-        userProfile: true,
-      },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email: dto.email,
+        },
+        include: {
+          userProfile: true,
+        },
+      });
+      if (!user) throw new Error(`Cannot find user with email ${dto.email}`);
 
-    if (!user)
-      throw new ForbiddenException(
-        `We could not find user with email '${dto.email}'`,
+      const pwdMatches = await argon.verify(user.password, dto.password);
+      if (!pwdMatches) throw new Error("Password doesn't match!");
+
+      delete user.password;
+      return Responser({
+        statusCode: 200,
+        message: 'Login successfully',
+        data: {
+          user,
+          token: await this.signToken(user.id, user.userProfile.role),
+        },
+      });
+    } catch (err) {
+      throw new CustomRpcException(
+        400,
+        'Login fail',
+        err.code ? err.meta : err.message,
       );
-
-    const pwdMatches = await argon.verify(user.password, dto.password);
-    if (!pwdMatches) throw new ForbiddenException("Password doesn't match!");
-    delete user.password;
-    return {
-      statusCode: 200,
-      user: user,
-      token: await this.signToken(user.id, user.userProfile.role),
-    };
+    }
   }
 
   async signToken(userId: string, role: string) {

@@ -13,7 +13,7 @@ export class AuthController {
       name: string;
       phone: string;
       email: string;
-      role: 'Admin' | 'Moderator';
+      role: 'Admin' | 'Staff';
     },
   ) {
     return this.authService.invite(dto);
