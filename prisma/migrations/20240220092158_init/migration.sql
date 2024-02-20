@@ -1,16 +1,16 @@
 -- CreateEnum
-CREATE TYPE "User_Role" AS ENUM ('SuperAdmin', 'Admin', 'Moderator', 'User');
+CREATE TYPE "User_Role" AS ENUM ('SuperAdmin', 'Admin', 'Staff', 'User');
 
 -- CreateEnum
 CREATE TYPE "OTP_STATUS" AS ENUM ('UNUSED', 'USED');
 
 -- CreateTable
 CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
-    "phone" VARCHAR(255),
-    "email" VARCHAR(255) NOT NULL,
-    "password" VARCHAR(255) NOT NULL,
-    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+    "id" STRING NOT NULL,
+    "phone" STRING,
+    "email" STRING NOT NULL,
+    "password" STRING,
+    "isDeleted" BOOL NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -19,9 +19,9 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Otp" (
-    "id" TEXT NOT NULL,
-    "phone" VARCHAR(255) NOT NULL,
-    "code" TEXT NOT NULL,
+    "id" STRING NOT NULL,
+    "phone" STRING NOT NULL,
+    "code" STRING NOT NULL,
     "status" "OTP_STATUS" NOT NULL DEFAULT 'UNUSED',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -31,11 +31,11 @@ CREATE TABLE "Otp" (
 
 -- CreateTable
 CREATE TABLE "UserProfile" (
-    "id" TEXT NOT NULL,
-    "username" TEXT,
-    "userId" VARCHAR(255),
+    "id" STRING NOT NULL,
+    "username" STRING,
+    "userId" STRING NOT NULL,
     "role" "User_Role" NOT NULL DEFAULT 'User',
-    "fileId" TEXT,
+    "fileId" STRING,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -44,10 +44,10 @@ CREATE TABLE "UserProfile" (
 
 -- CreateTable
 CREATE TABLE "File" (
-    "id" TEXT NOT NULL,
-    "fileName" VARCHAR(255) NOT NULL,
-    "path" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
+    "id" STRING NOT NULL,
+    "fileName" STRING NOT NULL,
+    "path" STRING NOT NULL,
+    "slug" STRING NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -64,7 +64,7 @@ CREATE UNIQUE INDEX "Otp_phone_key" ON "Otp"("phone");
 CREATE UNIQUE INDEX "UserProfile_userId_key" ON "UserProfile"("userId");
 
 -- AddForeignKey
-ALTER TABLE "UserProfile" ADD CONSTRAINT "UserProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "UserProfile" ADD CONSTRAINT "UserProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserProfile" ADD CONSTRAINT "UserProfile_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File"("id") ON DELETE SET NULL ON UPDATE CASCADE;

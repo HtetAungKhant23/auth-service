@@ -3,15 +3,16 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  // provider = "postgresql"
+  provider = "cockroachdb"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id        String  @id @default(uuid())
-  phone     String? @db.VarChar(255)
-  email     String  @unique @db.VarChar(255)
-  password  String? @db.VarChar(255)
+  phone     String?
+  email     String  @unique
+  password  String?
   isDeleted Boolean @default(false)
 
   createdAt   DateTime     @default(now())
@@ -21,7 +22,7 @@ model User {
 
 model Otp {
   id     String     @id @default(uuid())
-  phone  String     @unique @db.VarChar(255)
+  phone  String     @unique
   code   String
   status OTP_STATUS @default(UNUSED)
 
@@ -32,7 +33,7 @@ model Otp {
 model UserProfile {
   id       String    @id @default(uuid())
   username String?
-  userId   String    @unique @db.VarChar(255)
+  userId   String    @unique
   user     User      @relation(references: [id], fields: [userId], onDelete: Cascade)
   role     User_Role @default(User)
   fileId   String?
@@ -44,9 +45,9 @@ model UserProfile {
 
 model File {
   id       String @id @default(uuid())
-  fileName String @db.VarChar(255)
-  path     String @db.Text
-  slug     String @db.Text
+  fileName String
+  path     String
+  slug     String
 
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
