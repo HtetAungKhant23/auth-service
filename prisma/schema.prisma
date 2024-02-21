@@ -9,15 +9,82 @@ datasource db {
 }
 
 model User {
-  id        String  @id @default(uuid())
-  phone     String?
-  email     String  @unique
-  password  String?
-  isDeleted Boolean @default(false)
+  id         String      @id @default(uuid())
+  phone      String?
+  email      String      @unique
+  password   String?
+  profile    UserProfile @relation(fields: [profile_id], references: [id])
+  profile_id String      @unique
+  role       Role        @relation(fields: [role_id], references: [id])
+  role_id    String
+  is_deleted Boolean     @default(false)
 
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  userProfile UserProfile?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@map("users")
+}
+
+model UserProfile {
+  id         String  @id @default(uuid())
+  user_name  String
+  file_id    String?
+  file       File?   @relation(references: [id], fields: [file_id], onDelete: SetNull)
+  is_deleted Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  User     User?
+  location Location[]
+
+  @@map("user_profiles")
+}
+
+model Role {
+  id         String  @unique @default(uuid())
+  name       String
+  is_deleted Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  Permission Permission[]
+  User       User[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id         String  @unique @default(uuid())
+  role       Role    @relation(fields: [role_id], references: [id])
+  role_id    String
+  action     String
+  subject    String
+  inverted   Boolean @default(false)
+  conditions Json?   @db.JsonB()
+  reason     String?
+  is_deleted Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@map("permissions")
+}
+
+model Location {
+  id              String      @id @default(uuid())
+  address         String
+  township        String
+  city            String
+  user_profile    UserProfile @relation(fields: [user_profile_id], references: [id])
+  user_profile_id String
+  is_deleted      Boolean     @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  @@map("locations")
 }
 
 model Otp {
@@ -26,32 +93,25 @@ model Otp {
   code   String
   status OTP_STATUS @default(UNUSED)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
 
-model UserProfile {
-  id       String    @id @default(uuid())
-  username String?
-  userId   String    @unique
-  user     User      @relation(references: [id], fields: [userId], onDelete: Cascade)
-  role     User_Role @default(User)
-  fileId   String?
-  file     File?     @relation(references: [id], fields: [fileId], onDelete: SetNull)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@map("otps")
 }
 
 model File {
-  id       String @id @default(uuid())
-  fileName String
-  path     String
-  slug     String
+  id         String  @id @default(uuid())
+  file_name  String
+  path       String
+  slug       String
+  is_deleted Boolean @default(false)
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  UserProfile UserProfile[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt()
+
+  user_profile UserProfile[]
+
+  @@map("files")
 }
 
 enum User_Role {
