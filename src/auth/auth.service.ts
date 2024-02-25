@@ -8,66 +8,26 @@ import { Responser } from 'src/libs/exception/Responser';
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
-    private jwt: JwtService,
+    private readonly prisma: PrismaService,
+    private readonly jwt: JwtService,
   ) {}
 
-  async invite(dto: {
-    name: string;
-    phone: string;
-    email: string;
-    role: 'Admin' | 'Staff';
-  }) {
-    const existingStaffOrAdmin = await this.prisma.user.findFirst({
-      where: {
-        phone: dto.phone,
-        email: dto.email,
-      },
-    });
-    if (existingStaffOrAdmin)
-      throw new Error('Phone number or email already exist');
-
-    return await this.prisma.user
+  async signup(name: string, email: string, password: string) {
+    return this.prisma.user
       .create({
         data: {
-          phone: dto.phone,
-          email: dto.email,
-          userProfile: {
+          email: email,
+          password: await argon.hash(password),
+          profile: {
             create: {
-              username: dto.name,
-              role: dto.role,
+              user_name: name,
             },
           },
-        },
-        include: {
-          userProfile: true,
-        },
-      })
-      .then((newInvited) => {
-        return Responser({
-          statusCode: 201,
-          message: 'New invitation success',
-          data: newInvited,
-        });
-      })
-      .catch((err) => {
-        throw new CustomRpcException(
-          400,
-          'Fail to new invite',
-          err.code ? err.meta : err.message,
-        );
-      });
-  }
-
-  async signup(dto: { name: string; email: string; password: string }) {
-    return await this.prisma.user
-      .create({
-        data: {
-          email: dto.email,
-          password: await argon.hash(dto.password),
-          userProfile: {
-            create: {
-              username: dto.name,
+          role: {
+            connect: {
+              id: (
+                await this.prisma.role.findFirst({ where: { name: 'user' } })
+              ).id,
             },
           },
         },
@@ -76,32 +36,37 @@ export class AuthService {
         delete user.password;
         return Responser({
           statusCode: 201,
-          message: 'Sing up user successfully',
+          message: 'Signup successfully',
           data: user,
         });
       })
       .catch((err) => {
         throw new CustomRpcException(
           400,
-          'User account cannot create',
+          'user account cannot create',
           err.code ? err.meta : err.message,
         );
       });
   }
 
-  async login(dto: { email: string; password: string }) {
+  async login(email: string, password: string) {
     try {
       const user = await this.prisma.user.findUnique({
         where: {
-          email: dto.email,
+          email: email,
         },
         include: {
-          userProfile: true,
+          profile: true,
+          role: {
+            include: {
+              Permission: true,
+            },
+          },
         },
       });
-      if (!user) throw new Error(`Cannot find user with email ${dto.email}`);
+      if (!user) throw new Error(`Cannot find user with this email[${email}]`);
 
-      const pwdMatches = await argon.verify(user.password, dto.password);
+      const pwdMatches = await argon.verify(user.password, password);
       if (!pwdMatches) throw new Error("Password doesn't match!");
 
       delete user.password;
@@ -110,7 +75,7 @@ export class AuthService {
         message: 'Login successfully',
         data: {
           user,
-          token: await this.signToken(user.id, user.userProfile.role),
+          token: await this.signToken(user.id, user.role.name),
         },
       });
     } catch (err) {
@@ -122,10 +87,10 @@ export class AuthService {
     }
   }
 
-  async signToken(userId: string, role: string) {
+  async signToken(userId: string, role_name: string) {
     const payload = {
-      id: userId,
-      role,
+      user_id: userId,
+      role_name,
     };
 
     const token = await this.jwt.signAsync(payload, {

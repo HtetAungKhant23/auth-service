@@ -1,29 +1,8 @@
-/*
-  Warnings:
+-- CreateEnum
+CREATE TYPE "User_Role" AS ENUM ('SuperAdmin', 'Admin', 'Staff', 'User');
 
-  - You are about to drop the `File` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Otp` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `UserProfile` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "UserProfile" DROP CONSTRAINT "UserProfile_fileId_fkey";
-
--- DropForeignKey
-ALTER TABLE "UserProfile" DROP CONSTRAINT "UserProfile_userId_fkey";
-
--- DropTable
-DROP TABLE "File";
-
--- DropTable
-DROP TABLE "Otp";
-
--- DropTable
-DROP TABLE "User";
-
--- DropTable
-DROP TABLE "UserProfile";
+-- CreateEnum
+CREATE TYPE "OTP_STATUS" AS ENUM ('UNUSED', 'USED');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -32,7 +11,7 @@ CREATE TABLE "users" (
     "email" STRING NOT NULL,
     "password" STRING,
     "profile_id" STRING NOT NULL,
-    "role_id" STRING,
+    "role_id" STRING NOT NULL,
     "is_deleted" BOOL NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -50,20 +29,6 @@ CREATE TABLE "user_profiles" (
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "user_profiles_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "locations" (
-    "id" STRING NOT NULL,
-    "address" STRING NOT NULL,
-    "township" STRING NOT NULL,
-    "city" STRING NOT NULL,
-    "user_profile_id" STRING NOT NULL,
-    "is_deleted" BOOL NOT NULL DEFAULT false,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "locations_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -87,6 +52,20 @@ CREATE TABLE "permissions" (
     "is_deleted" BOOL NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "locations" (
+    "id" STRING NOT NULL,
+    "address" STRING NOT NULL,
+    "township" STRING NOT NULL,
+    "city" STRING NOT NULL,
+    "user_profile_id" STRING NOT NULL,
+    "is_deleted" BOOL NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "locations_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -133,13 +112,13 @@ CREATE UNIQUE INDEX "otps_phone_key" ON "otps"("phone");
 ALTER TABLE "users" ADD CONSTRAINT "users_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "user_profiles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_file_id_fkey" FOREIGN KEY ("file_id") REFERENCES "files"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "locations" ADD CONSTRAINT "locations_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "permissions" ADD CONSTRAINT "permissions_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "permissions" ADD CONSTRAINT "permissions_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "locations" ADD CONSTRAINT "locations_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "user_profiles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

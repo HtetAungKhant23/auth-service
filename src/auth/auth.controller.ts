@@ -6,26 +6,13 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @MessagePattern({ cmd: 'invite-staff' })
-  invite(
-    @Payload()
-    dto: {
-      name: string;
-      phone: string;
-      email: string;
-      role: 'Admin' | 'Staff';
-    },
-  ) {
-    return this.authService.invite(dto);
+  @MessagePattern({ cmd: 'sign-up' })
+  signup(@Payload() dto: { email: string; name: string; password: string }) {
+    return this.authService.signup(dto.email, dto.name, dto.password);
   }
 
-  @MessagePattern({ cmd: 'signup' })
-  signup(@Payload() dto: { name: string; email: string; password: string }) {
-    return this.authService.signup(dto);
-  }
-
-  @MessagePattern({ cmd: 'login' })
+  @MessagePattern({ cmd: 'sign-in' })
   login(@Payload() dto: { email: string; password: string }) {
-    return this.authService.login(dto);
+    return this.authService.login(dto.email, dto.password);
   }
 }

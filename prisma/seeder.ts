@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as argon from 'argon2';
 const prisma = new PrismaClient();
 
 const main = async () => {
@@ -37,7 +37,7 @@ const main = async () => {
     ],
   });
 
-  const hashedPassword = await bcrypt.hash('123456', 10);
+  const hashedPassword = await argon.hash('123456');
   await prisma.user.create({
     data: {
       email: 'superAdmin@gmail.com',
