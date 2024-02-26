@@ -12,7 +12,7 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  async signup(name: string, email: string, password: string) {
+  async signup(email: string, name: string, password: string) {
     return this.prisma.user
       .create({
         data: {
