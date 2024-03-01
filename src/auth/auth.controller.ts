@@ -11,7 +11,7 @@ export class AuthController {
     return this.authService.signup(dto.email, dto.name, dto.password);
   }
 
-  @MessagePattern({ cmd: 'sign-in' })
+  @MessagePattern({ cmd: 'log-in' })
   login(@Payload() dto: { email: string; password: string }) {
     return this.authService.login(dto.email, dto.password);
   }

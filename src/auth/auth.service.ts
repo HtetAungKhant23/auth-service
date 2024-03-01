@@ -69,12 +69,10 @@ export class AuthService {
       const pwdMatches = await argon.verify(user.password, password);
       if (!pwdMatches) throw new Error("Password doesn't match!");
 
-      delete user.password;
       return Responser({
         statusCode: 200,
         message: 'Login successfully',
         data: {
-          user,
           token: await this.signToken(user.id, user.role.name),
         },
       });
